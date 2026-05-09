@@ -1,0 +1,107 @@
+syntax = "proto3";
+
+package Connector;
+
+service Connector {
+  rpc CreatePoll(CreatePollParams) returns (CreatePollResult);
+  rpc GetPollResults(GetPollResultsParams) returns (GetPollResultsResult);
+  rpc QueryTracks(Query) returns (QueryTrackResponse);
+  rpc GetTrack(TrackRequest) returns (stream TrackResponse);
+}
+
+message CreatePollParams {
+  repeated string options = 1;
+}
+
+message CreatePollResult {
+  string story_id = 1;
+}
+
+message GetPollResultsParams {
+  string story_id = 1;
+}
+
+message GetPollResultsResult {
+  int32 views = 1;
+  repeated PollResult results = 2;
+}
+
+message PollResult {
+  string text = 1;
+  int32 count = 2;
+}
+
+message Query {
+  string query = 1;
+}
+
+message Track {
+  int64 id = 1;
+  bool readable = 2;
+  string title = 3;
+  string title_short = 4;
+  int32 duration = 5;
+  int32 rank = 6;
+  string preview = 7;
+  string md5_image = 8;
+
+  Artist artist = 9;
+  Album album = 10;
+
+  message Artist {
+    string name = 1;
+  }
+
+  message Album {
+    int64 id = 1;
+    string title = 2;
+    string cover_small = 3;
+    string cover_medium = 4;
+  }
+}
+
+message QueryTrackResponse {
+  string query = 1;
+  repeated Track items = 2;
+}
+
+message TrackRequest {
+  int64 track_id = 1;
+}
+
+// ===== audio analysis
+
+message AnalysisSection {
+  float start = 1;
+  float confidence = 2;
+  float duration = 3;
+  float tempo = 4;
+  int32 key = 5;
+}
+
+message TrackAudioAnalysis {
+  message Track {
+    int32 num_samples = 1;
+    float duration = 2;
+    float tempo = 3;
+    int32 time_signature = 4;
+    int32 key = 5;
+  }
+
+  Track track = 1;
+  repeated AnalysisSection sections = 2;
+}
+
+message TrackQueryAnalysis {
+  string track_full_name = 1;
+  TrackAudioAnalysis analysis = 2;
+}
+
+// ===== end audio analysis
+
+message TrackResponse {
+  bool status_ok = 1;
+  optional Track metadata = 2;
+  optional TrackQueryAnalysis analysis = 3;
+  optional bytes buffer = 4;
+}

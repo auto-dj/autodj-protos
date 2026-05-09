@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package chef;
+
+service Chef {
+  rpc testRecipe (MixRecipe) returns (stream Chunk) {}
+  rpc createPoll (PollRequest) returns (PollResponse) {}
+  rpc getPollVotes (PollVotesRequest) returns (PollVotesResponse) {}
+  rpc requestAction (ActionRequest) returns (ActionResponse) {}
+}
+
+message Label {
+  string id = 1;
+  string name = 2;
+  string color = 3;
+}
+
+message MixRecipe {
+  repeated Label out_labels = 1;
+  repeated Label in_labels = 2;
+  string json = 3;
+}
+
+message Chunk {
+  optional bytes buffer = 1;
+  optional int32 duration = 2;
+}
+
+message Track {
+  optional bytes buffer = 1;
+  optional double bpm = 2;
+  optional double samplerate = 3;
+  optional int32 bitdepth = 4;
+  optional int32 channels = 5;
+  optional int32 size = 6;
+  optional int32 duration = 7;
+}
+
+message TrackInfo {
+  string id = 1;
+  string artist = 2;
+  string title = 3;
+}
+
+message TrackResults {
+  int32 votes = 1;
+  bool picked = 2;
+}
+
+message PollRequest {
+  string label_id = 1;
+}
+
+message PollResponse {
+  string id = 1;
+  repeated TrackInfo tracks = 2;
+}
+
+message PollVotesRequest {
+  string poll_id = 1;
+}
+
+message PollVotesResponse {
+  int32 views = 1;
+  repeated TrackResults tracks = 2;
+}
+
+message ActionRequest {
+  string stream_id = 1;
+  string type = 2;
+}
+
+message ActionResponse {
+  string status = 1;
+  string message = 2;
+}

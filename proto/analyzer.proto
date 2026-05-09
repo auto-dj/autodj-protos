@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package analyzer;
+
+service Analyzer {
+  rpc AnalyzeTrack (AnalyzeRequest) returns (AnalyzeResponse);
+  rpc Ping (PingRequest) returns (Pong);
+}
+
+message AnalyzeRequest {
+  string track_id = 1;
+  oneof source {
+    string s3_key = 2;     // preferred: analyzer pulls directly from S3
+    string file_path = 3;  // local dev / on-disk imports
+  }
+  bool refine_with_madmom = 4; // default true; set false to skip DBN refinement
+}
+
+message Segment {
+  double start = 1;
+  double end = 2;
+  string label = 3; // e.g. "intro", "verse", "chorus", "bridge", "outro"
+}
+
+message Phrase {
+  int32 bar = 1;          // absolute bar number, 1-indexed
+  double start = 2;       // start time in seconds (= first downbeat of this phrase)
+  int32 length_bars = 3;  // number of bars (up to 8)
+  string section = 4;     // structural label of the segment this phrase falls inside
+}
+
+message AnalyzeResponse {
+  double bpm = 1;
+  string key = 2;                  // best-effort; empty in v1
+  repeated double beats = 3;       // seconds, ms precision (madmom-refined when available)
+  repeated double downbeats = 4;   // seconds (beat_in_bar == 1 in madmom output)
+  repeated Segment segments = 5;   // boundaries snapped to nearest madmom downbeat
+  repeated Phrase phrases = 6;     // 8-bar phrase groups tagged with segment label
+  string analyzer_version = 7;     // e.g. "allin1@1.1.0+madmom@0.16.1"
+  double duration = 8;             // total duration in seconds
+}
+
+message PingRequest {}
+message Pong { string response = 1; }

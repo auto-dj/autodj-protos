@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package trackprocessor;
+
+service TrackProcessor {
+  // Process instructions
+  rpc ProcessInstructions (stream Instructions) returns (stream Chunk) {}
+  rpc Ping (PingRequest) returns (Pong) {}
+}
+
+enum CrossfadeType {
+  IN = 0;
+  OUT = 1;
+}
+
+enum FilterType {
+  LOWPASS = 0;
+  BANDPASS = 1;
+  HIGHPASS = 2;
+  LOWGAIN = 3;
+  MIDGAIN = 4;
+  HIGHGAIN = 5;
+  VOLUME = 6;
+  TIMESTRETCH = 7;
+  LOOP = 8;
+}
+
+enum CurveType {
+  LINEAR = 0;
+  QUADRATIC = 1;
+}
+
+message PingRequest {}
+
+message Pong {
+  string response = 1;
+}
+
+message Filter {
+  FilterType type = 1;
+  int32 startSample = 2;
+  int32 endSample = 3;
+  double startValue = 4;
+  double endValue = 5;
+  CurveType curve = 6;
+}
+
+message Operations {
+  int32 outputSample = 1;
+  int32 trimStartSample = 2;
+  int32 trimEndSample = 3;
+  CrossfadeType crossfadeType = 4;
+  repeated Filter filters = 5;
+}
+
+message Track {
+  optional bytes buffer = 1;
+  optional double bpm = 2;
+  optional double samplerate = 3;
+  optional int32 bitdepth = 4;
+  optional int32 channels = 5;
+  optional int32 size = 6;
+  optional int32 duration = 7;
+  optional string volumePath = 8;
+  optional string format = 9;
+}
+
+message Chunk {
+  optional bytes buffer = 1;
+  optional int32 duration = 2;
+}
+
+message TrackInstruction {
+  int32 trackIndex = 1;
+  Operations operations = 2;
+}
+
+message Instructions {
+  repeated Track tracks = 1;
+  repeated TrackInstruction tracksInstructions = 2;
+  repeated Filter masterInstructions = 3;
+}
