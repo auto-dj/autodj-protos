@@ -29,6 +29,22 @@ message Phrase {
   string section = 4;     // structural label of the segment this phrase falls inside
 }
 
+// Per-bar RMS energy of each Demucs stem.
+// One BarStems entry per bar in the track (parallel to downbeats).
+message BarStems {
+  int32 bar = 1;     // absolute bar number, 1-indexed (matches Phrase.bar)
+  float vocal = 2;   // RMS of the vocal stem over this bar
+  float bass = 3;    // RMS of the bass stem over this bar
+  float drums = 4;   // RMS of the drums stem over this bar
+  float other = 5;   // RMS of the "other" stem over this bar
+}
+
+// Fixed-size audio embedding for one segment.
+// Index of each entry corresponds to the segment at the same index in AnalyzeResponse.segments.
+message SegmentEmbedding {
+  repeated float values = 1; // fixed-size embedding vector
+}
+
 message AnalyzeResponse {
   double bpm = 1;
   string key = 2;                  // best-effort; empty in v1
@@ -38,6 +54,12 @@ message AnalyzeResponse {
   repeated Phrase phrases = 6;     // 8-bar phrase groups tagged with segment label
   string analyzer_version = 7;     // e.g. "allin1@1.1.0+madmom@0.16.1"
   double duration = 8;             // total duration in seconds
+  repeated BarStems bar_stems = 9;             // per-bar RMS for each Demucs stem (vocal/bass/drums/other)
+  repeated SegmentEmbedding segment_embeddings = 10; // one fixed-size audio embedding per segment (parallel to `segments`)
+  repeated string segment_captions = 11;       // short text caption per segment (parallel to `segments`)
+
+  // Reserve field numbers for forward-compatibility with upcoming analyzer features.
+  reserved 12 to 20;
 }
 
 message PingRequest {}
