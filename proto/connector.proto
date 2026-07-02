@@ -7,6 +7,19 @@ service Connector {
   rpc GetPollResults(GetPollResultsParams) returns (GetPollResultsResult);
   rpc QueryTracks(Query) returns (QueryTrackResponse);
   rpc GetTrack(TrackRequest) returns (stream TrackResponse);
+  // Generic LLM completion (Anthropic): system + user prompt -> text.
+  rpc LlmComplete(LlmCompleteParams) returns (LlmCompleteResult);
+}
+
+message LlmCompleteParams {
+  string system = 1;      // system prompt
+  string user = 2;        // user message
+  string model = 3;       // optional; empty = connector default
+  int32 max_tokens = 4;   // optional; 0 = default
+}
+
+message LlmCompleteResult {
+  string text = 1;
 }
 
 message CreatePollParams {
