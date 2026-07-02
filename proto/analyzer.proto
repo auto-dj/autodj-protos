@@ -27,6 +27,7 @@ message Phrase {
   double start = 2;       // start time in seconds (= first downbeat of this phrase)
   int32 length_bars = 3;  // number of bars (up to 8)
   string section = 4;     // structural label of the segment this phrase falls inside
+  double energy = 5;      // mean RMS over the phrase, normalised 0..1 across the track
 }
 
 // Per-bar RMS energy of each Demucs stem.
@@ -57,9 +58,12 @@ message AnalyzeResponse {
   repeated BarStems bar_stems = 9;             // per-bar RMS for each Demucs stem (vocal/bass/drums/other)
   repeated SegmentEmbedding segment_embeddings = 10; // one fixed-size audio embedding per segment (parallel to `segments`)
   repeated string segment_captions = 11;       // short text caption per segment (parallel to `segments`)
+  string bass_onset_mask = 12;     // rhythmic fingerprint: one '0'/'1' per half-beat on the grid (kick present)
+  int32 bits_per_beat = 13;        // slots per beat in bass_onset_mask (2 = half-beat)
+  string vocal_mask = 14;          // vocal fingerprint: one '0'/'1' per BAR (downbeat-aligned), 1 = vocals present
 
   // Reserve field numbers for forward-compatibility with upcoming analyzer features.
-  reserved 12 to 20;
+  reserved 15 to 20;
 }
 
 message PingRequest {}
