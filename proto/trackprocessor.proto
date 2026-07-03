@@ -23,6 +23,20 @@ enum FilterType {
   VOLUME = 6;
   TIMESTRETCH = 7;
   LOOP = 8;
+  // Creative FX (added 2026-07). Primary knob = startValue/endValue ("amount");
+  // secondary knobs live in Filter.params (see ParamRamp). Neutral = 0 unless noted.
+  REVERB = 9;       // primary: wet mix.   params: size, damping
+  DELAY = 10;       // primary: mix.       params: time (beat frac), feedback
+  DISTORTION = 11;  // primary: drive.     params: tone
+  GATE = 12;        // primary: depth.     params: rate (beat frac), duty
+  BITCRUSHER = 13;  // primary: crush.     params: bits, downsample
+  TREMOLO = 14;     // primary: depth.     params: rate (beat frac), shape
+  PHASER = 15;      // primary: mix.       params: rate (beat frac), depth, feedback
+  CHORUS = 16;      // primary: mix.       params: rate, depth
+  FLANGER = 17;     // primary: mix.       params: rate (beat frac), depth, feedback
+  NOTCH = 18;       // primary: cut depth. params: freq, q
+  PITCHSHIFT = 19;  // primary: semitones (-12..12, neutral 0). params: formant
+  REVERSE = 20;     // structural: reverse the segment (like LOOP). no ramp.
 }
 
 enum CurveType {
@@ -36,13 +50,24 @@ message Pong {
   string response = 1;
 }
 
+// A single automatable secondary knob (independent ramp + curve).
+message ParamRamp {
+  double start = 1;        // value at startSample
+  double end = 2;          // value at endSample
+  CurveType curve = 3;     // per-param ramp shape (LINEAR default)
+}
+
 message Filter {
   FilterType type = 1;
   int32 startSample = 2;
   int32 endSample = 3;
-  double startValue = 4;
-  double endValue = 5;
-  CurveType curve = 6;
+  double startValue = 4;   // PRIMARY knob ramp start ("amount")
+  double endValue = 5;     // PRIMARY knob ramp end
+  CurveType curve = 6;     // primary knob ramp shape
+  // Secondary automatable knobs, keyed by name (e.g. "rate", "feedback", "mix",
+  // "size", "bits", "time", "q", "depth", "duty", "shape", "formant", "downsample").
+  // Empty for all legacy filters (LOWPASS..LOOP).
+  map<string, ParamRamp> params = 7;
 }
 
 message Operations {
