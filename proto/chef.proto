@@ -4,9 +4,17 @@ package chef;
 
 service Chef {
   rpc testRecipe (MixRecipe) returns (stream Chunk) {}
+  // Test a STREAM's transition end-to-end with the live joint selection:
+  // random out-track from the stream's label, then the best (recipe x exit
+  // cue x entry cue) triple across ALL the stream book's recipes, baked.
+  rpc testStream (TestStreamRequest) returns (stream Chunk) {}
   rpc createPoll (PollRequest) returns (PollResponse) {}
   rpc getPollVotes (PollVotesRequest) returns (PollVotesResponse) {}
   rpc requestAction (ActionRequest) returns (ActionResponse) {}
+}
+
+message TestStreamRequest {
+  string stream_id = 1;
 }
 
 message Label {
@@ -24,6 +32,9 @@ message MixRecipe {
 message Chunk {
   optional bytes buffer = 1;
   optional int32 duration = 2;
+  // Human-readable pick summary for the test flows (which recipe / cue pair
+  // won and why) — shown by the dashboard next to the played audio.
+  optional string info = 3;
 }
 
 message Track {
